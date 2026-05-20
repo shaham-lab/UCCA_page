@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unpaired CCA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #f7f5f0;
+            --bg2: #eeeae0;
+            --ink: #1a1814;
+            --ink2: #4a4640;
+            --ink3: #7a736a;
+            --accent: #c84b2f;
+            --accent2: #2f6fc8;
+            --accent3: #2a8a5a;
+            --border: #d8d0c4;
+            --card: #ffffff;
+            --serif: 'DM Serif Display', Georgia, serif;
+            --sans: 'DM Sans', system-ui, sans-serif;
+            --mono: 'DM Mono', 'Courier New', monospace;
+            --radius: 6px;
+            --max: 960px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--ink);
+            font-size: 16px;
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── HEADER / HERO ── */
+        .hero {
+            background: var(--ink);
+            color: var(--bg);
+            padding: 80px 24px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 50%, rgba(200, 75, 47, .18) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 60% at 80% 40%, rgba(47, 111, 200, .15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .venue-badge {
+            display: inline-block;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            border: 1px solid rgba(200, 75, 47, .4);
+            padding: 4px 12px;
+            border-radius: 2px;
+            margin-bottom: 28px;
+        }
+
+        .hero h1 {
+            font-family: var(--serif);
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            font-weight: 400;
+            line-height: 1.15;
+            max-width: 800px;
+            margin: 0 auto 32px;
+            color: #fff;
+        }
+
+        .hero h1 em {
+            font-style: italic;
+            color: inherit;
+        }
+
+        .authors {
+            font-size: 18px;
+            color: #c8c0b4;
+            margin-bottom: 10px;
+            line-height: 2;
+        }
+
+        .authors a {
+            color: #d0c8bc;
+            text-underline-offset: 3px;
+        }
+
+        .affil {
+            font-size: 16px;
+            color: #8a8278;
+            margin-bottom: 36px;
+            font-family: var(--mono);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            padding: 10px 22px;
+            border-radius: var(--radius);
+            text-decoration: none;
+            transition: all .18s;
+            border: 1.5px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #a83a20;
+        }
+
+        .btn-secondary {
+            border-color: rgba(255, 255, 255, .3);
+            color: #c8c0b4;
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(255, 255, 255, .6);
+            color: #fff;
+            background: rgba(255, 255, 255, .07);
+        }
+
+        /* ── LAYOUT ── */
+        .wrap {
+            max-width: var(--max);
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        section {
+            padding: 72px 0;
+        }
+
+        section+section {
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── SECTION LABELS ── */
+        .section-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            font-family: var(--serif);
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 400;
+            line-height: 1.25;
+            margin-bottom: 24px;
+        }
+
+        h3 {
+            font-family: var(--serif);
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 14px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--ink2);
+        }
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+
+        strong {
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        a {
+            color: var(--accent2);
+        }
+
+        /* ── ABSTRACT ── */
+        .abstract-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 32px 36px;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .abstract-box p {
+            color: var(--ink2);
+        }
+
+        /* ── KEY INSIGHT BANNER ── */
+        .insight-banner {
+            background: var(--ink);
+            color: var(--bg);
+            border-radius: var(--radius);
+            padding: 28px 36px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin: 40px 0;
+        }
+
+        .insight-icon {
+            font-size: 2.2rem;
+            flex-shrink: 0;
+        }
+
+        .insight-text {
+            font-family: var(--serif);
+            font-size: 1.15rem;
+            font-style: italic;
+            color: #d8d0c4;
+            line-height: 1.5;
+        }
+
+        .insight-text strong {
+            color: #fff;
+            font-style: normal;
+        }
+
+        /* ── FIGURE BLOCKS ── */
+        .figure-block {
+            margin: 36px auto;
+            text-align: center;
+            width: 100%;
+        }
+
+        .figure-block.block-small {
+            max-width: 500px;
+        }
+
+        .figure-block.block-large {
+            max-width: 900px;
+        }
+
+        .figure-block.block-full {
+            max-width: 100%;
+        }
+
+        .figure-img {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .figure-img img {
+            width: 100%;
+            display: block;
+            border-radius: var(--radius);
+        }
+
+        .figure-img.small {
+            max-width: 500px;
+        }
+
+        .figure-img.large {
+            max-width: 900px;
+        }
+
+        .figure-placeholder {
+            width: 100%;
+            max-width: 720px;
+            height: 320px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            background: var(--bg2);
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--ink3);
+            font-family: var(--mono);
+            font-size: 13px;
+        }
+
+        .figure-placeholder .fig-num {
+            font-size: 11px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--border);
+        }
+
+        .figure-caption {
+            margin-top: 14px;
+            font-size: 13.5px;
+            color: var(--ink3);
+            display: block;
+            text-align: left;
+            line-height: 1.6;
+            width: 100%;
+        }
+
+        .figure-caption strong {
+            color: var(--ink2);
+        }
+
+        /* ── GIF GRID ── */
+        .gif-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 32px 0;
+        }
+
+        .gif-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gif-card img {
+            width: 100%;
+            height: 450px;
+            object-fit: contain;
+            display: block;
+            background: #fff;
+        }
+
+        .gif-card-label {
+            padding: 10px;
+            font-family: var(--mono);
+            font-size: 14px;
+            color: var(--ink2);
+            border-top: 1px solid var(--border);
+            background: var(--bg1);
+            margin-top: auto;
+        }
+
+        @media (max-width: 480px) {
+            .gif-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── TWO-UP FIGURES ── */
+        .fig-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin: 36px 0;
+        }
+
+        @media (max-width: 640px) {
+            .fig-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fig-row .figure-placeholder {
+            max-width: 100%;
+            height: 240px;
+        }
+
+        /* ── ANIMATION EMBED ── */
+        .animation-frame {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--card);
+        }
+
+        .animation-frame iframe {
+            width: 100%;
+            height: 480px;
+            border: none;
+            display: block;
+        }
+
+        /* ── ALGORITHM BOX ── */
+        .algo-box {
+            background: var(--ink);
+            color: #d4cec8;
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            font-family: var(--mono);
+            font-size: 13.5px;
+            line-height: 1.9;
+            margin: 32px 0;
+            overflow-x: auto;
+        }
+
+        .algo-title {
+            color: #fff;
+            font-weight: 500;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, .15);
+            font-size: 12px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }
+
+        .algo-kw {
+            color: var(--accent);
+        }
+
+        .algo-comment {
+            color: #6a6460;
+            font-style: italic;
+        }
+
+        .algo-indent {
+            padding-left: 24px;
+        }
+
+        .algo-indent2 {
+            padding-left: 48px;
+        }
+
+        .algo-highlight {
+            color: #8fc8a8;
+        }
+
+        /* ── CONTRIBUTIONS ── */
+        .contrib-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 28px 0;
+        }
+
+        .contrib-list li {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .contrib-num {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+        }
+
+        .contrib-text {
+            color: var(--ink2);
+        }
+
+        .contrib-text strong {
+            color: var(--ink);
+        }
+
+        /* ── RESULTS TABLE ── */
+        .results-table-wrap {
+            overflow-x: auto;
+            margin: 32px 0;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+            white-space: nowrap;
+        }
+
+        thead tr {
+            background: var(--ink);
+            color: #d4cec8;
+        }
+
+        thead th {
+            padding: 12px 16px;
+            text-align: center;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        thead th:first-child {
+            text-align: left;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            background: var(--card);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr.ours {
+            background: #f0f8f4;
+        }
+
+        tbody tr.upper {
+            background: var(--bg2);
+            color: var(--ink3);
+            font-style: italic;
+            opacity: 0.6;
+        }
+
+        tbody td {
+            padding: 10px 16px;
+            text-align: center;
+            color: var(--ink2);
+        }
+
+        tbody td:first-child {
+            text-align: left;
+            font-weight: 500;
+            color: var(--ink);
+        }
+
+        .best {
+            font-weight: 700;
+            color: var(--accent3);
+        }
+
+        .second-best {
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        /* ── TAKEAWAY BOXES ── */
+        .takeaway {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            margin: 24px 0;
+        }
+
+        .takeaway-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: rgba(200, 75, 47, .08);
+            border: 1px solid rgba(200, 75, 47, .2);
+            padding: 4px 10px;
+            border-radius: 2px;
+            white-space: nowrap;
+            align-self: flex-start;
+            margin-top: 2px;
+        }
+
+        .takeaway-text {
+            font-family: var(--serif);
+            font-style: italic;
+            font-size: 1rem;
+            color: var(--ink2);
+            line-height: 1.5;
+        }
+
+        /* ── METHOD PIPELINE ── */
+        .pipeline {
+            display: flex;
+            gap: 0;
+            align-items: stretch;
+            margin: 36px 0;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .pipeline-step {
+            flex: 1;
+            padding: 24px 20px;
+            text-align: center;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            position: relative;
+        }
+
+        .pipeline-step:last-child {
+            border-right: none;
+        }
+
+        .pipeline-step-num {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--accent);
+            letter-spacing: .1em;
+            margin-bottom: 6px;
+        }
+
+        .pipeline-step-icon {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .pipeline-step-name {
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--ink);
+            letter-spacing: .04em;
+        }
+
+        .pipeline-step-desc {
+            font-size: 12px;
+            color: var(--ink3);
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .pipeline-arrow {
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            background: var(--bg2);
+            color: var(--ink3);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 640px) {
+            .pipeline {
+                flex-direction: column;
+            }
+
+            .pipeline-step {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .pipeline-step:last-child {
+                border-bottom: none;
+            }
+
+            .pipeline-arrow {
+                display: none;
+            }
+        }
+
+        /* ── BIBTEX ── */
+        .bibtex-block {
+            background: var(--ink);
+            color: #b8b0a8;
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            font-family: var(--mono);
+            font-size: 12.5px;
+            line-height: 1.8;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .bibtex-block .bib-key {
+            color: var(--accent);
+        }
+
+        .bibtex-block .bib-field {
+            color: #8fc8e8;
+        }
+
+        .bibtex-block .bib-val {
+            color: #d4cec8;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, .08);
+            border: 1px solid rgba(255, 255, 255, .15);
+            color: #b8b0a8;
+            padding: 5px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, .14);
+            color: #fff;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--ink);
+            color: #6a6460;
+            font-size: 12.5px;
+            font-family: var(--mono);
+            padding: 28px 24px;
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        footer a {
+            color: #8a8278;
+        }
+
+        /* ── MATH INLINE ── */
+        .math {
+            font-family: var(--mono);
+            font-size: .92em;
+            background: var(--bg2);
+            padding: 1px 5px;
+            border-radius: 3px;
+            color: var(--ink);
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(247, 245, 240, .92);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+        }
+
+        .nav-inner {
+            max-width: var(--max);
+            margin: 0 auto;
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .nav-inner::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-link {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--ink3);
+            text-decoration: none;
+            padding: 14px 18px;
+            white-space: nowrap;
+            border-bottom: 2px solid transparent;
+            transition: all .15s;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* ── SCROLL ANIMATION ── */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity .55s ease, transform .55s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HERO -->
+    <div class="hero">
+        <!-- <div class="venue-badge">NeurIPS 2026 · Submission</div> -->
+        <h1>Unpaired Canonical<br>Correlation Analysis</h1>
+        <div class="authors">Nir Ben-Ari, Ronen Talmon, Uri Shaham</div>
+        <div class="affil">Bar-Ilan University | Technion</div>
+        <div class="btn-row">
+            <a href="https://github.com/nirbenari/ucca" class="btn btn-secondary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                </svg>
+                Code
+            </a>
+            <a href="https://arxiv.org/abs/2410.12345" class="btn btn-secondary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <line x1="3" y1="9" x2="21" y2="9" />
+                    <line x1="9" y1="21" x2="9" y2="9" />
+                </svg>
+                arXiv
+            </a>
+            <a href="mailto:nirnirba@gmail.com" class="btn btn-secondary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                </svg>
+                Contact Us
+            </a>
+            <a href="#bibtex" class="btn btn-secondary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                </svg>
+                BibTeX
+            </a>
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <nav>
+        <div class="nav-inner">
+            <a href="#theory" class="nav-link">Theory</a>
+            <a href="#demo" class="nav-link">Demo</a>
+            <a href="#method" class="nav-link">Method</a>
+            <a href="#results" class="nav-link">Results</a>
+            <a href="#bibtex" class="nav-link">BibTeX</a>
+        </div>
+    </nav>
+
+    <!-- ABSTRACT -->
+    <section id="abstract">
+        <div class="wrap">
+            <div class="fade-in">
+                <div class="section-label">Abstract</div>
+                <h2>Learning Cross-View Correlations<br>Without Any Paired Samples</h2>
+                <div class="abstract-box">
+                    <p>Canonical Correlation Analysis (CCA) is a fundamental method for multiview shared-space learning.
+                        However, its strict reliance on <strong>paired data</strong> poses a significant limitation, as
+                        such data is often difficult to obtain or entirely unavailable.</p>
+                    <p>In this paper, we present <strong>Unpaired CCA (UCCA)</strong>, a novel method that learns linear
+                        projections to maximize the correlation of the true underlying pairing <em>without access to any
+                            paired samples</em>. We first establish theoretical results connecting the
+                        <strong>Quadratic Assignment Problem (QAP)</strong> to CCA. Leveraging these theoretical
+                        insights, we derive a practical method to maximize correlation exclusively from unpaired data.
+                    </p>
+                    <p>To the best of our knowledge, UCCA is the <strong>first approach to learn maximally correlated
+                            projections in a strictly unpaired setting</strong>. We validate UCCA on real-world
+                        multi-modal datasets, demonstrating that it significantly outperforms recent unpaired alignment
+                        baselines in recovering the underlying true correlation.</p>
+                </div>
+            </div>
+
+            <div class="insight-banner fade-in">
+                <div class="insight-icon">💡</div>
+                <div class="insight-text"><strong>Key Theoretical Insight:</strong> Unpaired CCA can be solved with
+                    linear kernel QAP.</div>
+            </div>
+
+            <!-- Contributions -->
+            <div class="fade-in">
+                <h3>Contributions</h3>
+                <ul class="contrib-list">
+                    <li>
+                        <div class="contrib-num">1</div>
+                        <div class="contrib-text"><strong>Theoretical connection</strong> between Unpaired CCA and the
+                            Quadratic Assignment Problem, providing a principled framework for correlation maximization
+                            without paired data.</div>
+                    </li>
+                    <li>
+                        <div class="contrib-num">2</div>
+                        <div class="contrib-text"><strong>Practical algorithm (UCCA)</strong> derived directly from the
+                            theory — using K-Means anchors, a QAP solver, and standard CCA — that is scalable and simple
+                            to implement.</div>
+                    </li>
+                    <li>
+                        <div class="contrib-num">3</div>
+                        <div class="contrib-text"><strong>Strong empirical results</strong> across six multi-modal
+                            benchmarks, significantly reducing the gap to paired CCA while operating entirely without
+                            paired correspondence.</div>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- THEORY -->
+    <section id="theory">
+        <div class="wrap">
+            <div class="fade-in">
+                <div class="section-label">Theory</div>
+                <h2>The QAP–CCA Connection</h2>
+                <p>Our approach is grounded in a theoretical investigation of the unpaired CCA problem. The key
+                    insight is that finding the optimal pairing for CCA is equivalent to solving a Quadratic Assignment
+                    Problem with linear kernels.</p>
+                <p>First we define a proxy pairing for Unpaired CCA scenaiors, taking into
+                    account the orthogonal projections in the CCA objective (see Fig. 1).</p>
+            </div>
+
+            <div class="takeaway fade-in">
+                <div class="takeaway-label">Takeaway 1</div>
+                <div class="takeaway-text">MCP<sub>O(d)</sub> — the pairing that maximizes the CCA objective function
+                    - defines a proxy pairing for Unpaired CCA.</div>
+            </div>
+
+            <div class="fade-in">
+                <h3>From MCP to QAP</h3>
+                <p>Directly optimizing over permutations and orthogonal matrices simultaneously is computationally
+                    prohibitive. We relax the orthogonal group <span class="math">O(d)</span> to the Frobenius sphere
+                    <span class="math">S<sub>F</sub></span>, yielding MCP<sub>S<sub>F</sub></sub>, which we prove is
+                    tractable:
+                </p>
+            </div>
+
+            <div class="takeaway fade-in">
+                <div class="takeaway-label">Theorem 1</div>
+                <div class="takeaway-text">MCP<sub>S<sub>F</sub></sub>(X, Y) = QAP(XX<sup>T</sup>, YY<sup>T</sup>). The
+                    relaxed pairing is exactly a QAP with linear kernels.</div>
+            </div>
+
+            <div class="fade-in">
+                <h3>The Two Pairings Coincide</h3>
+                <p>A critical question is whether the relaxation alters the optimal solution. Under a mild majorization
+                    condition on the singular values of the cross-correlation matrix - theoretically justified and
+                    empirically verified across all benchmarks - the two pairings are identical:</p>
+            </div>
+
+            <div class="takeaway fade-in">
+                <div class="takeaway-label">Theorem 2</div>
+                <div class="takeaway-text">Under realistic assumptions, MCP<sub>O(d)</sub>(X, Y) =
+                    MCP<sub>S<sub>F</sub></sub>(X, Y).</div>
+            </div>
+            <div class="takeaway fade-in">
+                <div class="takeaway-text">The computationally attainable
+                    Frobenius relaxation perfectly aligns with our proxy pairing.</div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- DEMO / ANIMATION -->
+    <section id="demo">
+        <div class="wrap">
+            <div class="fade-in">
+                <div class="section-label">Visualization</div>
+                <h2>MCP, MCP<sub>O(d)</sub>, MCP<sub>S<sub>F</sub></sub> - Demo</h2>
+                <p>The key insight of our work is the definition of the MCP<sub>O(d)</sub> proxy pairing. Standard
+                    Maximum Correlation Pairing (MCP) is highly dependent on input rotation and fails to retrieve a
+                    valid pairing when data views are unaligned. MCP<sub>O(d)</sub> is entirely invariant to orthogonal
+                    projections, enabling it to successfully retrieve the true pairing. Its relaxation,
+                    MCP<sub>S<sub>F</sub></sub>, inherits this invariance and likewise succeeds in recovering the
+                    correct correspondence.</p>
+            </div>
+
+            <div class="figure-block block-full fade-in">
+                <div class="gif-grid">
+                    <div class="gif-card">
+                        <img src="figures/GIF 1 MCP.gif" alt="MCP Aligned">
+                        <div class="gif-card-label">MCP (Fixed)</div>
+                    </div>
+                    <div class="gif-card">
+                        <img src="figures/GIF 2 MCP_rotations.gif" alt="MCP Rotated">
+                        <div class="gif-card-label">MCP (Rotated)</div>
+                    </div>
+                    <div class="gif-card">
+                        <img src="figures/GIF 3 MCP_O(d).gif" alt="MCP_O(d)">
+                        <div class="gif-card-label">MCP<sub>O(d)</sub></div>
+                    </div>
+                    <div class="gif-card">
+                        <img src="figures/GIF 4 MCP_SF.gif" alt="MCP_SF">
+                        <div class="gif-card-label">MCP<sub>S<sub>F</sub></sub></div>
+                    </div>
+                </div>
+
+                <div class="figure-caption">
+                    <strong>Fig. 1.</strong> Visual comparison of pairing methods. MCP fails under rotation, while our
+                    proposed rotation-invariant pairing (MCP<sub>O(d)</sub> and its relaxation
+                    MCP<sub>S<sub>F</sub></sub>)
+                    recovers the true correspondence.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- METHOD -->
+    <section id="method">
+        <div class="wrap">
+            <div class="fade-in">
+                <div class="section-label">Method</div>
+                <h2>Unpaired CCA Algorithm</h2>
+                <p>Derived from our theoretical insights, UCCA operates in four steps. Given two unpaired datasets <span
+                        class="math">X</span>
+                    and <span class="math">Y</span>, the algorithm extracts representative anchor points from each
+                    modality, matches them using a QAP solver, and then applies standard CCA to the matched
+                    pseudo-pairs.</p>
+            </div>
+
+            <!-- Pipeline -->
+            <div class="pipeline fade-in">
+                <div class="pipeline-step">
+                    <div class="pipeline-step-num">Step 1</div>
+                    <div class="pipeline-step-icon">⚪</div>
+                    <div class="pipeline-step-name">Whiten</div>
+                    <div class="pipeline-step-desc">PCA-whiten each view independently
+                    </div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="pipeline-step-num">Step 2</div>
+                    <div class="pipeline-step-icon">⚓</div>
+                    <div class="pipeline-step-name">Anchors</div>
+                    <div class="pipeline-step-desc">Extract K-Means centroids as geometric skeleton of each modality
+                    </div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="pipeline-step-num">Step 3</div>
+                    <div class="pipeline-step-icon">🔀</div>
+                    <div class="pipeline-step-name">QAP Match</div>
+                    <div class="pipeline-step-desc">Solve linear-kernel QAP on anchor sets to find optimal permutation
+                    </div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="pipeline-step-num">Step 4</div>
+                    <div class="pipeline-step-icon">📐</div>
+                    <div class="pipeline-step-name">CCA</div>
+                    <div class="pipeline-step-desc">Fit CCA on matched anchors to obtain projection matrices
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fig 4 placeholder -> method_demo.png -->
+            <div class="figure-block block-small fade-in">
+                <div class="figure-img small">
+                    <img src="figures/method_demo.png" alt="UCCA method overview">
+                </div>
+                <div class="figure-caption">
+                    <strong>Fig. 2.</strong> UCCA method overview: from unpaired data, through anchor selection and QAP
+                    matching, to final CCA projection.
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- RESULTS -->
+    <section id="results">
+        <div class="wrap">
+            <div class="fade-in">
+                <div class="section-label">Experiments</div>
+                <h2>Empirical Results</h2>
+                <p>We evaluate UCCA on six multi-modal benchmark configurations spanning single-cell multi-omics
+                    (SNARE), image-text pairs (Flickr, COCO), and handwritten digit views (PC, KL, PA). The training
+                    data is strictly unpaired: each view is drawn from a disjoint subset of the original samples.</p>
+            </div>
+
+            <!-- Figure 5 -->
+            <div class="figure-block block-large fade-in">
+                <div class="figure-img large">
+                    <img src="figures/tc_fig.png" alt="Total Correlation results across benchmarks">
+                </div>
+                <div class="figure-caption">
+                    <strong>Fig. 3.</strong> Total correlation achieved across six dataset configurations. UCCA
+                    consistently extracts highly correlated components, significantly outperforming all baselines, and
+                    often approaching the paired CCA upper bound.
+                </div>
+            </div>
+
+            <!-- Table 1 -->
+            <div class="fade-in">
+                <h3>Cross-View Classification Accuracy</h3>
+                <p>Using the learned embeddings from <em>unpaired</em> samples, we train a kNN classifier on one view
+                    and test it on the other. Higher is better. UCCA significantly outperforms all baselines
+                    across four datasets while maintaining comparable performance on the fifth.</p>
+            </div>
+            <div class="results-table-wrap fade-in">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>PC-KL</th>
+                            <th>PC-PA</th>
+                            <th>KL-PA</th>
+                            <th>SNARE</th>
+                            <th>COCO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>J-MDS-CCA</td>
+                            <td>0.083</td>
+                            <td>0.087</td>
+                            <td class="second-best">0.211</td>
+                            <td>0.247</td>
+                            <td class="best"><strong>0.237</strong></td>
+                        </tr>
+                        <tr>
+                            <td>SCOTv1-CCA</td>
+                            <td>0.074</td>
+                            <td class="second-best">0.121</td>
+                            <td>0.102</td>
+                            <td class="second-best">0.650</td>
+                            <td>0.141</td>
+                        </tr>
+                        <tr>
+                            <td>SCOTv2-CCA</td>
+                            <td class="second-best">0.148</td>
+                            <td>0.090</td>
+                            <td>0.113</td>
+                            <td>0.646</td>
+                            <td>0.164</td>
+                        </tr>
+                        <tr>
+                            <td>SCA</td>
+                            <td>0.097</td>
+                            <td>0.083</td>
+                            <td>0.100</td>
+                            <td>0.312</td>
+                            <td>0.161</td>
+                        </tr>
+                        <tr>
+                            <td>UCA</td>
+                            <td>0.088</td>
+                            <td>0.100</td>
+                            <td>0.159</td>
+                            <td>0.378</td>
+                            <td>0.132</td>
+                        </tr>
+                        <tr class="ours">
+                            <td><strong>UCCA (ours)</strong></td>
+                            <td class="best"><strong>0.292</strong></td>
+                            <td class="best"><strong>0.315</strong></td>
+                            <td class="best"><strong>0.564</strong></td>
+                            <td class="best"><strong>0.849</strong></td>
+                            <td class="second-best">0.232</td>
+                        </tr>
+                        <tr class="upper">
+                            <td>Paired CCA †</td>
+                            <td>0.562</td>
+                            <td>0.516</td>
+                            <td>0.629</td>
+                            <td>0.887</td>
+                            <td>0.232</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="fade-in" style="font-size:12.5px; color:var(--ink3); font-family:var(--mono);">† Paired CCA uses
+                the ground-truth pairing.</p>
+        </div>
+    </section>
+
+    <!-- BIBTEX -->
+    <section id="bibtex">
+        <div class="wrap">
+            <div class="fade-in">
+                <div class="section-label">Citation</div>
+                <h2>BibTeX</h2>
+                <p>If you find this work useful, please cite:</p>
+            </div>
+            <div class="bibtex-block fade-in" id="bibtex-code">
+                <button class="copy-btn" onclick="copyBibtex()">Copy</button>
+                <span class="bib-key">@article{benari2026unpaired,</span>
+                <span class="bib-field"> title</span> = {<span class="bib-val">Unpaired Canonical Correlation
+                    Analysis</span>},
+                <span class="bib-field"> author</span> = {<span class="bib-val">Ben-Ari, Nir and Talmon, Ronen and
+                    Shaham, Uri</span>},
+                <span class="bib-field"> journal</span> = {<span class="bib-val">arXiv preprint
+                    arXiv:2410.12345</span>},
+                <span class="bib-field"> year</span> = {<span class="bib-val">2026</span>}
+                <span class="bib-key">}</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+
+    </footer>
+
+    <script>
+        // Scroll-triggered fade-ins
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    observer.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Copy BibTeX
+        function copyBibtex() {
+            const raw = `@article{benari2026unpaired,
+  title  = {Unpaired Canonical Correlation Analysis},
+  author = {Ben-Ari, Nir, Talmon, Ronen and Shaham, Uri},
+  journal = {arXiv preprint arXiv:2410.12345},
+  year   = {2026}
+}`;
+            navigator.clipboard.writeText(raw).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = 'Copy', 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>
